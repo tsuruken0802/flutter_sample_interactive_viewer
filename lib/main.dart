@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -42,6 +46,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   final TransformationController _transformationController =
       TransformationController();
 
+  bool _isZoomedIn = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,16 +58,30 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     // );
   }
 
-  void _zoomIn() {
-    // setState(() {
-    //   _transformationController.value = _scaleMatrix(_scaleFactor);
-    // });
+  void _onTapped() {
+    setState(() {
+      _isZoomedIn = !_isZoomedIn;
+    });
   }
 
-  void _zoomOut() {
-    // setState(() {
-    //   _transformationController.value = _scaleMatrix(1 / _scaleFactor);
-    // });
+  // final image = AssetImage('assets/images/image.png');
+  Future<File> bundleAssetsImageToFile() async {
+    // Load the image from assets
+    final ByteData data = await rootBundle.load('assets/images/image.png');
+
+    // Get temporary directory
+    final Directory tempDir = await getApplicationDocumentsDirectory();
+
+    // Create a file path in the temporary directory
+    final String tempPath = '${tempDir.path}/image.png';
+
+    // Write the image data to the file
+    final File file = File(tempPath);
+    await file.writeAsBytes(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+      flush: true,
+    );
+    return file;
   }
 
   @override
@@ -108,14 +128,16 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: _zoomIn,
-              child: Text('Zoom In'),
+              onPressed: _onTapped,
+              child: Text(_isZoomedIn ? 'Zoom Out' : 'Zoom In'),
             ),
-            SizedBox(width: 20),
-            ElevatedButton(
-              onPressed: _zoomOut,
-              child: Text('Zoom Out'),
-            ),
+            FilledButton(
+              onPressed: () async {
+                final file = await bundleAssetsImageToFile();
+                print(file);
+              },
+              child: Text('Save Image'),
+            )
           ],
         ),
       ],
