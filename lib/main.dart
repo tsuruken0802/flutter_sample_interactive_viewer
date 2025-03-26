@@ -66,9 +66,9 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   void _onTapped() {
     if (_isZoomedIn) {
-      _transformationController!.value = _scaleMatrix(1.5);
+      _transformationController!.value = _scaleMatrix(1 / 1.25);
     } else {
-      _transformationController!.value = _scaleMatrix(1.0);
+      _transformationController!.value = _scaleMatrix(1.25);
     }
     setState(() {
       _isZoomedIn = !_isZoomedIn;
@@ -77,20 +77,28 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   Matrix4 _scaleMatrix(double scale) {
     // Create a matrix that scales around the center without changing the view position
-    final Matrix4 matrix = Matrix4.identity();
+    Matrix4 matrix = _transformationController!.value;
 
     // Get the center point of the view
     final double centerX = 0.5;
     final double centerY = 0.5;
 
     // Translate to the center point
-    matrix.translate(centerX, centerY);
+    // matrix.translate(centerX, centerY);
+
+    // To keep the image centered while scaling, we need to adjust the translation
+    // First, translate to the center point
+    // matrix.translate(centerX, centerY);
+
+    // Then translate back, but adjusted for the scale factor
+    // This ensures the center point remains fixed during scaling
+    matrix.translate(-centerX * scale, -centerY * scale);
 
     // Apply the scale
     matrix.scale(scale, scale);
 
     // Translate back from the center point
-    matrix.translate(-centerX, -centerY);
+    // matrix = matrix.translate(centerX, centerY);
 
     return matrix;
   }
@@ -123,25 +131,13 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     return file;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final containerWidth = MediaQuery.of(context).size.width;
-    final containerHeight = containerWidth;
-
+  Response? _calculateImageSize(double containerWidth, double containerHeight) {
     final imageRatio = imageSize?.closestRatio;
     if (imageRatio == null) {
-      return FilledButton(
-        onPressed: () async {
-          final file = await bundleAssetsImageToFile();
-          debugPrint(file.path);
-        },
-        child: Text('Save Image'),
-      );
+      return null;
     }
-
     final isWide = imageRatio > 1.0;
     final isNarrow = imageRatio < 1.0;
-
     double imageWidth, imageHeight;
     if (isWide) {
       imageHeight = containerHeight / imageSize!.closestRatio;
@@ -153,7 +149,6 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
       imageWidth = containerWidth;
       imageHeight = containerHeight;
     }
-
     double verticalPadding = 0;
     double horizontalPadding = 0;
     if (isWide) {
@@ -161,6 +156,32 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     } else if (isNarrow) {
       horizontalPadding = (containerWidth - imageWidth) / 2;
     }
+    return Response(
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      horizontalPadding: horizontalPadding,
+      verticalPadding: verticalPadding,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final containerWidth = MediaQuery.of(context).size.width;
+    final containerHeight = containerWidth;
+    final response = _calculateImageSize(containerWidth, containerHeight);
+    if (response == null) {
+      return FilledButton(
+        onPressed: () async {
+          final file = await bundleAssetsImageToFile();
+          debugPrint(file.path);
+        },
+        child: Text('Save Image'),
+      );
+    }
+    double imageWidth = response.imageWidth;
+    double imageHeight = response.imageHeight;
+    double horizontalPadding = response.horizontalPadding;
+    double verticalPadding = response.verticalPadding;
 
     if (_transformationController == null) {
       _transformationController = TransformationController();
@@ -229,4 +250,17 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
       ],
     );
   }
+}
+
+class Response {
+  final double imageWidth;
+  final double imageHeight;
+  final double horizontalPadding;
+  final double verticalPadding;
+
+  Response(
+      {required this.imageWidth,
+      required this.imageHeight,
+      required this.horizontalPadding,
+      required this.verticalPadding});
 }
