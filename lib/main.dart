@@ -101,8 +101,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     final translationY = isWide ? yPadding : oldMatrix.getTranslation().y;
 
     final translationMatrix = Matrix4.translationValues(
-      min(translationX, -maxX),
-      min(translationY, -maxY),
+      max(translationX, -maxX),
+      max(translationY, -maxY),
       oldMatrix.getTranslation().z,
     );
 
@@ -195,8 +195,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     }
     double imageWidth = response.imageWidth;
     double imageHeight = response.imageHeight;
-    double horizontalPadding = response.horizontalPadding;
-    double verticalPadding = response.verticalPadding;
+    double horizontalPadding = _isZoomedIn ? 0.0 : response.horizontalPadding;
+    double verticalPadding = _isZoomedIn ? 0.0 : response.verticalPadding;
 
     if (_transformationController == null) {
       _transformationController = TransformationController();
