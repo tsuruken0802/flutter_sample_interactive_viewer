@@ -41,8 +41,7 @@ class InteractiveViewerExample extends StatefulWidget {
 }
 
 class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
-  final TransformationController _transformationController =
-      TransformationController();
+  TransformationController? _transformationController;
 
   final imageName = 'yoko1.jpg';
 
@@ -136,6 +135,12 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
       verticalPadding = (containerHeight - imageHeight) / 2;
     } else if (isNarrow) {
       horizontalPadding = (containerWidth - imageWidth) / 2;
+    }
+
+    if (_transformationController == null) {
+      _transformationController = TransformationController();
+      _transformationController!.value =
+          Matrix4.translationValues(horizontalPadding, verticalPadding, 0);
     }
 
     return Column(
