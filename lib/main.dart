@@ -73,14 +73,16 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   Future<void> _initImageSize() async {
     final file = await _imageFile;
-    if (await file.exists()) {
-      final result = await ImageSizeCalculationUtil.getDesignImageRatio(
-        file,
-      );
-      setState(() {
-        imageSize = result;
-      });
+    if (!(await file.exists())) {
+      await bundleAssetsImageToFile();
+      return;
     }
+    final result = await ImageSizeCalculationUtil.getDesignImageRatio(
+      file,
+    );
+    setState(() {
+      imageSize = result;
+    });
   }
 
   Future<File> bundleAssetsImageToFile() async {
@@ -99,8 +101,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = width;
+    final containerWidth = MediaQuery.of(context).size.width;
+    final containerHeight = containerWidth;
 
     final imageRatio = imageSize?.closestRatio;
     if (imageRatio == null) {
@@ -118,29 +120,29 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
     double imageWidth, imageHeight;
     if (isWide) {
-      imageHeight = height / imageSize!.closestRatio;
+      imageHeight = containerHeight / imageSize!.closestRatio;
       imageWidth = imageHeight * imageSize!.realRatio;
     } else if (isNarrow) {
-      imageWidth = width / imageRatio;
-      imageHeight = height;
+      imageWidth = containerWidth / imageRatio;
+      imageHeight = containerHeight;
     } else {
-      imageWidth = width;
-      imageHeight = height;
+      imageWidth = containerWidth;
+      imageHeight = containerHeight;
     }
 
     double verticalPadding = 0;
     double horizontalPadding = 0;
     if (isWide) {
-      verticalPadding = (height - imageHeight) / 2;
+      verticalPadding = (containerHeight - imageHeight) / 2;
     } else if (isNarrow) {
-      horizontalPadding = (width - imageWidth) / 2;
+      horizontalPadding = (containerWidth - imageWidth) / 2;
     }
 
     return Column(
       children: [
         SizedBox(
-          width: width,
-          height: height,
+          width: containerWidth,
+          height: containerHeight,
           child: Container(
             color: Colors.red.withAlpha(100),
             child: InteractiveViewer(
@@ -151,7 +153,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
               panAxis: PanAxis.free,
               // trackpadScrollCausesScale: true,
               transformationController: _transformationController,
-              minScale: 0.1,
+              minScale: 1.0,
               maxScale: 5,
               onInteractionStart: (details) {
                 // print(details);
