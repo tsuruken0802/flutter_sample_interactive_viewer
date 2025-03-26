@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         body: Center(
           child: LayoutBuilder(
             builder: (context, constraints) =>
-                InteractiveViewerExample(size: constraints.biggest),
+                TransformationPage(size: constraints.biggest),
           ),
         ),
       ),
@@ -31,17 +31,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class InteractiveViewerExample extends StatefulWidget {
-  const InteractiveViewerExample({super.key, required this.size});
+class TransformationPage extends StatefulWidget {
+  const TransformationPage({super.key, required this.size});
 
   final Size size;
 
   @override
-  _InteractiveViewerExampleState createState() =>
-      _InteractiveViewerExampleState();
+  // ignore: library_private_types_in_public_api
+  _TransformationPageState createState() => _TransformationPageState();
 }
 
-class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
+class _TransformationPageState extends State<TransformationPage> {
   TransformationController? _transformationController;
 
   final imageName = 'seihou.jpg';
@@ -81,7 +81,6 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     final containerHeight = containerWidth;
     final response = _calculateImageSize(containerWidth, containerHeight)!;
     final isZoomMode = scale > 1.0;
-    print(isZoomMode ? 'zoomするよ' : 'normalするよ');
 
     // Translationできる最大値を取得する
     final maxX = max(0.0, response.imageWidth - containerWidth);
@@ -107,8 +106,6 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     final scaleMatrix = Matrix4.diagonal3Values(scale, scale, scale);
 
     final result = translationMatrix * scaleMatrix;
-
-    print(result.toString());
 
     // Translate back from the center point
     // matrix = matrix.translate(centerX, centerY);
@@ -249,8 +246,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
             ),
             FilledButton(
               onPressed: () async {
-                final file = await bundleAssetsImageToFile();
-                print(file);
+                await bundleAssetsImageToFile();
               },
               child: Text('Save Image'),
             ),
