@@ -13,6 +13,7 @@ class ImageSizeCalculationUtil {
       width: imageSize.$1,
       height: imageSize.$2,
       closestRatio: closestRate,
+      realRatio: imageRatio,
     );
   }
 
@@ -47,10 +48,12 @@ class ImageSizeResponse {
   final double width;
   final double height;
   final double closestRatio;
+  final double realRatio;
 
   ImageSizeResponse({
     required this.width,
     required this.height,
     required this.closestRatio,
+    required this.realRatio,
   });
 }

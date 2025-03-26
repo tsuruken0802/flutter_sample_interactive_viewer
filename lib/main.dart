@@ -107,7 +107,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
       return FilledButton(
         onPressed: () async {
           final file = await bundleAssetsImageToFile();
-          print(file);
+          debugPrint(file.path);
         },
         child: Text('Save Image'),
       );
@@ -119,7 +119,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     double imageWidth, imageHeight;
     if (isWide) {
       imageHeight = height / imageSize!.closestRatio;
-      imageWidth = imageSize!.width;
+      imageWidth = imageHeight * imageSize!.realRatio;
     } else if (isNarrow) {
       imageWidth = width / imageRatio;
       imageHeight = height;
@@ -168,7 +168,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
                   'assets/images/$imageName',
                   width: imageWidth,
                   height: imageHeight,
-                  // fit: BoxFit.cover,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
