@@ -78,7 +78,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   Matrix4 _scaleMatrix(double scale) {
     final controller = _transformationController!;
-    final imageSize = _imageSize!;
+    final ImageSizeResponse imageSize = _imageSize!;
     final containerWidth = MediaQuery.of(context).size.width;
     final containerHeight = containerWidth;
     final response = _calculateImageSize(containerWidth, containerHeight)!;
@@ -86,8 +86,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     print(isZoomMode ? 'zoomするよ' : 'normalするよ');
 
     // Translationできる最大値を取得する
-    final maxX = max(0.0, imageSize.width - containerWidth);
-    final maxY = max(0.0, imageSize.height - containerHeight);
+    final maxX = max(0.0, response.imageWidth - containerWidth);
+    final maxY = max(0.0, response.imageHeight - containerHeight);
 
     final isWide = imageSize.realRatio > 1.0;
     final isNarrow = imageSize.realRatio < 1.0;
