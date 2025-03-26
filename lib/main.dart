@@ -76,31 +76,28 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   }
 
   Matrix4 _scaleMatrix(double scale) {
-    // Create a matrix that scales around the center without changing the view position
-    Matrix4 matrix = _transformationController!.value;
+    final controller = _transformationController!;
+    // final imageSize = imageSize;
 
-    // Get the center point of the view
-    final double centerX = 0.5;
-    final double centerY = 0.5;
+    Matrix4 matrix = controller.value;
+    final oldMatrix = Matrix4.copy(matrix);
 
-    // Translate to the center point
-    // matrix.translate(centerX, centerY);
+    final m = Matrix4.translationValues(
+      oldMatrix.getTranslation().x,
+      0,
+      oldMatrix.getTranslation().z,
+    );
 
-    // To keep the image centered while scaling, we need to adjust the translation
-    // First, translate to the center point
-    // matrix.translate(centerX, centerY);
+    final scaleMatrix = Matrix4.diagonal3Values(scale, scale, scale);
 
-    // Then translate back, but adjusted for the scale factor
-    // This ensures the center point remains fixed during scaling
-    matrix.translate(-centerX * scale, -centerY * scale);
+    final result = m * scaleMatrix;
 
-    // Apply the scale
-    matrix.scale(scale, scale);
+    print(result.toString());
 
     // Translate back from the center point
     // matrix = matrix.translate(centerX, centerY);
 
-    return matrix;
+    return result;
   }
 
   Future<void> _initImageSize() async {
