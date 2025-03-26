@@ -44,6 +44,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   final TransformationController _transformationController =
       TransformationController();
 
+  final imageName = 'yoko1.jpg';
+
   bool _isZoomedIn = false;
   // double imageWidth = 0;
   // double imageHeight = 0;
@@ -53,7 +55,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     // Get temporary directory
     final Directory tempDir = await getApplicationDocumentsDirectory();
     // Create a file path in the temporary directory
-    final String tempPath = '${tempDir.path}/image.png';
+    final String tempPath = '${tempDir.path}/$imageName';
     return File(tempPath);
   }
 
@@ -78,10 +80,9 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     });
   }
 
-  // final image = AssetImage('assets/images/image.png');
   Future<File> bundleAssetsImageToFile() async {
     // Load the image from assets
-    final ByteData data = await rootBundle.load('assets/images/image.png');
+    final ByteData data = await rootBundle.load('assets/images/$imageName');
 
     // Write the image data to the file
     final File file = await _imageFile;
@@ -155,10 +156,10 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
                 width: imageWidth,
                 height: imageHeight,
                 child: Image.asset(
-                  'assets/images/image.png',
+                  'assets/images/$imageName',
                   width: imageWidth,
                   height: imageHeight,
-                  fit: BoxFit.cover,
+                  // fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -171,13 +172,13 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
               onPressed: _onTapped,
               child: Text(_isZoomedIn ? 'Zoom Out' : 'Zoom In'),
             ),
-            // FilledButton(
-            //   onPressed: () async {
-            //     final file = await bundleAssetsImageToFile();
-            //     print(file);
-            //   },
-            //   child: Text('Save Image'),
-            // ),
+            FilledButton(
+              onPressed: () async {
+                final file = await bundleAssetsImageToFile();
+                print(file);
+              },
+              child: Text('Save Image'),
+            ),
             FilledButton(
               onPressed: () async {},
               child: Text('比率確認'),
