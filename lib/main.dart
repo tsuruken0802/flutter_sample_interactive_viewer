@@ -40,14 +40,14 @@ class InteractiveViewerExample extends StatefulWidget {
       _InteractiveViewerExampleState();
 }
 
-const _childWidth = 994.0;
-const _childHeight = 408.0;
-
 class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   final TransformationController _transformationController =
       TransformationController();
 
   bool _isZoomedIn = false;
+  // double imageWidth = 0;
+  // double imageHeight = 0;
+  ImageSizeResponse? imageSize;
 
   Future<File> get _imageFile async {
     // Get temporary directory
@@ -60,16 +60,21 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   @override
   void initState() {
     super.initState();
-    // _transformationController.value = Matrix4.translationValues(
-    //   -_childWidth / 2 + widget.size.width / 2,
-    //   -_childHeight / 2 + widget.size.height / 2,
-    //   0,
-    // );
+    _initImageSize();
   }
 
   void _onTapped() {
     setState(() {
       _isZoomedIn = !_isZoomedIn;
+    });
+  }
+
+  Future<void> _initImageSize() async {
+    final result = await ImageSizeCalculationUtil.getDesignImageRatio(
+      await _imageFile,
+    );
+    setState(() {
+      imageSize = result;
     });
   }
 
@@ -84,6 +89,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
       data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
       flush: true,
     );
+
     return file;
   }
 
@@ -91,7 +97,35 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = width;
-    final verticalPadding = (height - _childHeight) / 2;
+
+    final imageRatio = imageSize?.closestRatio;
+    if (imageRatio == null) {
+      return const SizedBox.shrink();
+    }
+
+    final isWide = imageRatio > 1.0;
+    final isNarrow = imageRatio < 1.0;
+
+    double imageWidth, imageHeight;
+    if (isWide) {
+      imageHeight = height / imageSize!.closestRatio;
+      imageWidth = imageSize!.width;
+    } else if (isNarrow) {
+      imageWidth = width / imageRatio;
+      imageHeight = height;
+    } else {
+      imageWidth = width;
+      imageHeight = height;
+    }
+
+    double verticalPadding = 0;
+    double horizontalPadding = 0;
+    if (isWide) {
+      verticalPadding = (height - imageHeight) / 2;
+    } else if (isNarrow) {
+      horizontalPadding = (width - imageWidth) / 2;
+    }
+
     return Column(
       children: [
         SizedBox(
@@ -100,7 +134,10 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
           child: Container(
             color: Colors.red.withAlpha(100),
             child: InteractiveViewer(
-              boundaryMargin: EdgeInsets.symmetric(vertical: verticalPadding),
+              boundaryMargin: EdgeInsets.symmetric(
+                vertical: verticalPadding,
+                horizontal: horizontalPadding,
+              ),
               panAxis: PanAxis.free,
               // trackpadScrollCausesScale: true,
               transformationController: _transformationController,
@@ -115,12 +152,12 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
               constrained: false,
               child: Container(
                 color: Colors.blue.withAlpha(100),
-                width: _childWidth,
-                height: _childHeight,
+                width: imageWidth,
+                height: imageHeight,
                 child: Image.asset(
                   'assets/images/image.png',
-                  width: _childWidth,
-                  height: _childHeight,
+                  width: imageWidth,
+                  height: imageHeight,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -142,13 +179,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
             //   child: Text('Save Image'),
             // ),
             FilledButton(
-              onPressed: () async {
-                final ratio =
-                    await ImageSizeCalculationUtil.getDesignImageRatio(
-                  await _imageFile,
-                );
-                print(ratio);
-              },
+              onPressed: () async {},
               child: Text('比率確認'),
             ),
           ],

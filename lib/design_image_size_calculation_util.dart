@@ -5,17 +5,25 @@ import 'package:flutter/widgets.dart';
 // 写真の表示用の比率を計算するクラス
 class ImageSizeCalculationUtil {
   // 表示用の比率を取得する
-  static Future<double> getDesignImageRatio(File imageFile) async {
-    final imageRatio = await _getImageRatio(imageFile);
+  static Future<ImageSizeResponse> getDesignImageRatio(File imageFile) async {
+    final imageSize = await _getDesignImageSize(imageFile);
+    final imageRatio = _getImageRatio(imageSize.$1, imageSize.$2);
     final closestRate = _getClosestRatio(imageRatio);
-    return closestRate;
+    return ImageSizeResponse(
+      width: imageSize.$1,
+      height: imageSize.$2,
+      closestRatio: closestRate,
+    );
   }
 
-  // 画像の縦横比を計算する
-  static Future<double> _getImageRatio(File imageFile) async {
+  static Future<(double, double)> _getDesignImageSize(File imageFile) async {
     final image = await decodeImageFromList(await imageFile.readAsBytes());
     final width = image.width.toDouble();
     final height = image.height.toDouble();
+    return (width, height);
+  }
+
+  static double _getImageRatio(double width, double height) {
     if (height <= 0.0) {
       return 1.0; // 0割禁止
     }
@@ -33,4 +41,16 @@ class ImageSizeCalculationUtil {
             ? current
             : closest);
   }
+}
+
+class ImageSizeResponse {
+  final double width;
+  final double height;
+  final double closestRatio;
+
+  ImageSizeResponse({
+    required this.width,
+    required this.height,
+    required this.closestRatio,
+  });
 }
