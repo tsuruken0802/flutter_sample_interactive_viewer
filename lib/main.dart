@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sample_transformation/design_image_size_calculation_util.dart';
+import 'package:flutter_sample_transformation/image_size_calculation_util.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -47,8 +47,6 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   final imageName = 'seihou.jpg';
 
   bool _isZoomedIn = false;
-  // double imageWidth = 0;
-  // double imageHeight = 0;
   ImageSizeResponse? _imageSize;
 
   Future<File> get _imageFile async {
