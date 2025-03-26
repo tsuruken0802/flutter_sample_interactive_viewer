@@ -48,7 +48,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   bool _isZoomedIn = false;
   // double imageWidth = 0;
   // double imageHeight = 0;
-  ImageSizeResponse? imageSize;
+  ImageSizeResponse? _imageSize;
 
   Future<File> get _imageFile async {
     // Get temporary directory
@@ -66,7 +66,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   void _onTapped() {
     if (_isZoomedIn) {
-      _transformationController!.value = _scaleMatrix(1 / 1.25);
+      _transformationController!.value = _scaleMatrix(1);
     } else {
       _transformationController!.value = _scaleMatrix(1.25);
     }
@@ -77,20 +77,30 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   Matrix4 _scaleMatrix(double scale) {
     final controller = _transformationController!;
-    // final imageSize = imageSize;
+    final imageSize = _imageSize!;
+    final containerWidth = MediaQuery.of(context).size.width;
+    final containerHeight = containerWidth;
+    final response = _calculateImageSize(containerWidth, containerHeight)!;
+    final isZoomMode = scale > 1.0;
+    print(isZoomMode ? 'zoomするよ' : 'normalするよ');
 
+    final isWide = imageSize.realRatio > 1.0;
+    final isNarrow = imageSize.realRatio < 1.0;
     Matrix4 matrix = controller.value;
     final oldMatrix = Matrix4.copy(matrix);
 
-    final m = Matrix4.translationValues(
-      oldMatrix.getTranslation().x,
-      0,
+    final translationXValue = isZoomMode ? 0.0 : response.horizontalPadding;
+    final translationYValue = isZoomMode ? 0.0 : response.verticalPadding;
+
+    final translationMatrix = Matrix4.translationValues(
+      isNarrow ? translationXValue : oldMatrix.getTranslation().x,
+      isWide ? translationYValue : oldMatrix.getTranslation().y,
       oldMatrix.getTranslation().z,
     );
 
     final scaleMatrix = Matrix4.diagonal3Values(scale, scale, scale);
 
-    final result = m * scaleMatrix;
+    final result = translationMatrix * scaleMatrix;
 
     print(result.toString());
 
@@ -110,7 +120,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
       file,
     );
     setState(() {
-      imageSize = result;
+      _imageSize = result;
     });
   }
 
@@ -129,7 +139,7 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   }
 
   Response? _calculateImageSize(double containerWidth, double containerHeight) {
-    final imageRatio = imageSize?.closestRatio;
+    final imageRatio = _imageSize?.closestRatio;
     if (imageRatio == null) {
       return null;
     }
@@ -137,8 +147,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     final isNarrow = imageRatio < 1.0;
     double imageWidth, imageHeight;
     if (isWide) {
-      imageHeight = containerHeight / imageSize!.closestRatio;
-      imageWidth = imageHeight * imageSize!.realRatio;
+      imageHeight = containerHeight / _imageSize!.closestRatio;
+      imageWidth = imageHeight * _imageSize!.realRatio;
     } else if (isNarrow) {
       imageWidth = containerWidth / imageRatio;
       imageHeight = containerHeight;
