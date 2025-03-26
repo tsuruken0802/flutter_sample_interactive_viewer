@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -84,17 +85,24 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     final isZoomMode = scale > 1.0;
     print(isZoomMode ? 'zoomするよ' : 'normalするよ');
 
+    // Translationできる最大値を取得する
+    final maxX = max(0.0, imageSize.width - containerWidth);
+    final maxY = max(0.0, imageSize.height - containerHeight);
+
     final isWide = imageSize.realRatio > 1.0;
     final isNarrow = imageSize.realRatio < 1.0;
     Matrix4 matrix = controller.value;
     final oldMatrix = Matrix4.copy(matrix);
 
-    final translationXValue = isZoomMode ? 0.0 : response.horizontalPadding;
-    final translationYValue = isZoomMode ? 0.0 : response.verticalPadding;
+    final xPadding = isZoomMode ? 0.0 : response.horizontalPadding;
+    final yPadding = isZoomMode ? 0.0 : response.verticalPadding;
+
+    final translationX = isNarrow ? xPadding : oldMatrix.getTranslation().x;
+    final translationY = isWide ? yPadding : oldMatrix.getTranslation().y;
 
     final translationMatrix = Matrix4.translationValues(
-      isNarrow ? translationXValue : oldMatrix.getTranslation().x,
-      isWide ? translationYValue : oldMatrix.getTranslation().y,
+      min(translationX, -maxX),
+      min(translationY, -maxY),
       oldMatrix.getTranslation().z,
     );
 
