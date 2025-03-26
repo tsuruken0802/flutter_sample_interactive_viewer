@@ -65,9 +65,34 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   }
 
   void _onTapped() {
+    if (_isZoomedIn) {
+      _transformationController!.value = _scaleMatrix(1.5);
+    } else {
+      _transformationController!.value = _scaleMatrix(1.0);
+    }
     setState(() {
       _isZoomedIn = !_isZoomedIn;
     });
+  }
+
+  Matrix4 _scaleMatrix(double scale) {
+    // Create a matrix that scales around the center without changing the view position
+    final Matrix4 matrix = Matrix4.identity();
+
+    // Get the center point of the view
+    final double centerX = 0.5;
+    final double centerY = 0.5;
+
+    // Translate to the center point
+    matrix.translate(centerX, centerY);
+
+    // Apply the scale
+    matrix.scale(scale, scale);
+
+    // Translate back from the center point
+    matrix.translate(-centerX, -centerY);
+
+    return matrix;
   }
 
   Future<void> _initImageSize() async {
