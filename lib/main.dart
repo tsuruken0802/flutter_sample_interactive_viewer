@@ -72,12 +72,15 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   }
 
   Future<void> _initImageSize() async {
-    final result = await ImageSizeCalculationUtil.getDesignImageRatio(
-      await _imageFile,
-    );
-    setState(() {
-      imageSize = result;
-    });
+    final file = await _imageFile;
+    if (await file.exists()) {
+      final result = await ImageSizeCalculationUtil.getDesignImageRatio(
+        file,
+      );
+      setState(() {
+        imageSize = result;
+      });
+    }
   }
 
   Future<File> bundleAssetsImageToFile() async {
@@ -101,7 +104,13 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
     final imageRatio = imageSize?.closestRatio;
     if (imageRatio == null) {
-      return const SizedBox.shrink();
+      return FilledButton(
+        onPressed: () async {
+          final file = await bundleAssetsImageToFile();
+          print(file);
+        },
+        child: Text('Save Image'),
+      );
     }
 
     final isWide = imageRatio > 1.0;
