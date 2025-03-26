@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sample_transformation/design_image_size_calculation_util.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -48,6 +49,14 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
 
   bool _isZoomedIn = false;
 
+  Future<File> get _imageFile async {
+    // Get temporary directory
+    final Directory tempDir = await getApplicationDocumentsDirectory();
+    // Create a file path in the temporary directory
+    final String tempPath = '${tempDir.path}/image.png';
+    return File(tempPath);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -69,14 +78,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
     // Load the image from assets
     final ByteData data = await rootBundle.load('assets/images/image.png');
 
-    // Get temporary directory
-    final Directory tempDir = await getApplicationDocumentsDirectory();
-
-    // Create a file path in the temporary directory
-    final String tempPath = '${tempDir.path}/image.png';
-
     // Write the image data to the file
-    final File file = File(tempPath);
+    final File file = await _imageFile;
     await file.writeAsBytes(
       data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
       flush: true,
@@ -131,13 +134,23 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
               onPressed: _onTapped,
               child: Text(_isZoomedIn ? 'Zoom Out' : 'Zoom In'),
             ),
+            // FilledButton(
+            //   onPressed: () async {
+            //     final file = await bundleAssetsImageToFile();
+            //     print(file);
+            //   },
+            //   child: Text('Save Image'),
+            // ),
             FilledButton(
               onPressed: () async {
-                final file = await bundleAssetsImageToFile();
-                print(file);
+                final ratio =
+                    await ImageSizeCalculationUtil.getDesignImageRatio(
+                  await _imageFile,
+                );
+                print(ratio);
               },
-              child: Text('Save Image'),
-            )
+              child: Text('比率確認'),
+            ),
           ],
         ),
       ],
