@@ -44,7 +44,7 @@ class TransformationPage extends StatefulWidget {
 class _TransformationPageState extends State<TransformationPage> {
   TransformationController? _transformationController;
 
-  final imageName = 'seihou.jpg';
+  final imageName = 'tate1.jpg';
 
   bool _isZoomedIn = false;
   ImageSizeResponse? _imageSize;
