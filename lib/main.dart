@@ -44,7 +44,7 @@ class InteractiveViewerExample extends StatefulWidget {
 class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
   TransformationController? _transformationController;
 
-  final imageName = 'yoko1.jpg';
+  final imageName = 'seihou.jpg';
 
   bool _isZoomedIn = false;
   // double imageWidth = 0;
@@ -158,8 +158,8 @@ class _InteractiveViewerExampleState extends State<InteractiveViewerExample> {
       imageHeight = containerHeight / _imageSize!.closestRatio;
       imageWidth = imageHeight * _imageSize!.realRatio;
     } else if (isNarrow) {
-      imageWidth = containerWidth / imageRatio;
-      imageHeight = containerHeight;
+      imageWidth = containerWidth * _imageSize!.closestRatio;
+      imageHeight = imageWidth / _imageSize!.realRatio;
     } else {
       imageWidth = containerWidth;
       imageHeight = containerHeight;
