@@ -44,6 +44,7 @@ class TransformationPage extends StatefulWidget {
 
 class _TransformationPageState extends State<TransformationPage> {
   TransformationController? _transformationController;
+  final ScrollController _scrollController = ScrollController();
 
   final imageName = 'tate1.jpg';
 
@@ -105,7 +106,6 @@ class _TransformationPageState extends State<TransformationPage> {
     );
 
     final scaleMatrix = Matrix4.diagonal3Values(scale, scale, scale);
-
     final result = translationMatrix * scaleMatrix;
 
     // Translate back from the center point
@@ -205,29 +205,29 @@ class _TransformationPageState extends State<TransformationPage> {
         SizedBox(
           width: containerWidth,
           height: containerHeight,
-          child: InteractiveViewer(
-            trackpadScrollCausesScale: true,
-            boundaryMargin: EdgeInsets.symmetric(
-              vertical: verticalPadding,
-              horizontal: horizontalPadding,
-            ),
-            panAxis: PanAxis.free,
-            transformationController: _transformationController,
-            minScale: 1.0,
-            maxScale: 5,
-            onInteractionStart: (details) {
-              // print(details);
-            },
-            onInteractionEnd: (details) {
-              // print(details);
-            },
-            constrained: false,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: CustomScrollPhysics(),
             child: SizedBox(
-              width: imageWidth,
+              width: containerWidth,
               height: containerHeight,
-              child: SingleChildScrollView(
-                primary: false,
-                physics: AlwaysScrollableScrollPhysics(),
+              child: InteractiveViewer(
+                boundaryMargin: EdgeInsets.symmetric(
+                  vertical: verticalPadding,
+                  horizontal: horizontalPadding,
+                ),
+                panAxis: PanAxis.free,
+                transformationController: _transformationController,
+                minScale: 1.0,
+                maxScale: 5,
+                onInteractionStart: (details) {
+                  // print(details);
+                  // print(details);
+                },
+                onInteractionEnd: (details) {
+                  // print(details);
+                },
+                constrained: false,
                 child: SizedBox(
                   width: imageWidth,
                   height: imageHeight,
@@ -277,4 +277,31 @@ class Response {
       required this.imageHeight,
       required this.horizontalPadding,
       required this.verticalPadding});
+}
+
+class CustomScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that always lets the user scroll.
+  const CustomScrollPhysics({super.parent});
+
+  @override
+  CustomScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    print("scroll applyTo: $ancestor");
+    return CustomScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) {
+    print("scroll position: ${position.pixels}");
+    if (position.pixels <= 0) {
+      return false;
+    }
+    return false;
+  }
+
+  @override
+  bool get allowUserScrolling {
+    print("ユーザーがスクロールできるかどうかを返す");
+    // ユーザーがスクロールできるかどうかを返す
+    return false;
+  }
 }
