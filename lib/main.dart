@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sample_transformation/image_size_calculation_util.dart';
@@ -17,8 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('InteractiveViewer Example'),
+        appBar: CupertinoNavigationBar.large(
+          largeTitle: Text('サンプル'),
         ),
         body: Center(
           child: LayoutBuilder(
@@ -204,34 +205,38 @@ class _TransformationPageState extends State<TransformationPage> {
         SizedBox(
           width: containerWidth,
           height: containerHeight,
-          child: Container(
-            color: Colors.red.withAlpha(100),
-            child: InteractiveViewer(
-              boundaryMargin: EdgeInsets.symmetric(
-                vertical: verticalPadding,
-                horizontal: horizontalPadding,
-              ),
-              panAxis: PanAxis.free,
-              // trackpadScrollCausesScale: true,
-              transformationController: _transformationController,
-              minScale: 1.0,
-              maxScale: 5,
-              onInteractionStart: (details) {
-                // print(details);
-              },
-              onInteractionEnd: (details) {
-                // print(details);
-              },
-              constrained: false,
-              child: Container(
-                color: Colors.blue.withAlpha(100),
-                width: imageWidth,
-                height: imageHeight,
-                child: Image.asset(
-                  'assets/images/$imageName',
+          child: InteractiveViewer(
+            trackpadScrollCausesScale: true,
+            boundaryMargin: EdgeInsets.symmetric(
+              vertical: verticalPadding,
+              horizontal: horizontalPadding,
+            ),
+            panAxis: PanAxis.free,
+            transformationController: _transformationController,
+            minScale: 1.0,
+            maxScale: 5,
+            onInteractionStart: (details) {
+              // print(details);
+            },
+            onInteractionEnd: (details) {
+              // print(details);
+            },
+            constrained: false,
+            child: SizedBox(
+              width: imageWidth,
+              height: containerHeight,
+              child: SingleChildScrollView(
+                primary: false,
+                physics: AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
                   width: imageWidth,
                   height: imageHeight,
-                  fit: BoxFit.cover,
+                  child: Image.asset(
+                    'assets/images/$imageName',
+                    width: imageWidth,
+                    height: imageHeight,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
@@ -244,16 +249,16 @@ class _TransformationPageState extends State<TransformationPage> {
               onPressed: _onTapped,
               child: Text(_isZoomedIn ? 'Zoom Out' : 'Zoom In'),
             ),
-            FilledButton(
-              onPressed: () async {
-                await bundleAssetsImageToFile();
-              },
-              child: Text('Save Image'),
-            ),
-            FilledButton(
-              onPressed: () async {},
-              child: Text('比率確認'),
-            ),
+            // FilledButton(
+            //   onPressed: () async {
+            //     await bundleAssetsImageToFile();
+            //   },
+            //   child: Text('Save Image'),
+            // ),
+            // FilledButton(
+            //   onPressed: () async {},
+            //   child: Text('比率確認'),
+            // ),
           ],
         ),
       ],
