@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sample_transformation/image_size_calculation_util.dart';
+import 'package:flutter_sample_transformation/scrollable.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -18,16 +19,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: CupertinoNavigationBar.large(
-          largeTitle: Text('サンプル'),
-        ),
-        body: Center(
-          child: LayoutBuilder(
-            builder: (context, constraints) =>
-                TransformationPage(size: constraints.biggest),
+          appBar: CupertinoNavigationBar.large(
+            largeTitle: Text('サンプル'),
           ),
-        ),
-      ),
+          body: ScrollableImage(imagePath: 'assets/images/tate1.jpg')),
     );
   }
 }
