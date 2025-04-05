@@ -22,7 +22,7 @@ class _ScrollableImageState extends State<ScrollableImage> {
   final ScrollController _scrollController = ScrollController();
   bool _isZoomedIn = false;
 
-  double _scale = 1.0;
+  double _scale = 1.25;
 
   void _onTapped() {
     setState(() {
@@ -70,17 +70,14 @@ class _ScrollableImageState extends State<ScrollableImage> {
             child: SingleChildScrollView(
               controller: _scrollController,
               physics: const BouncingScrollPhysics(),
-              child: Transform.scale(
-                scale: 1.0,
-                child: SizedBox(
-                  width: 439 * _scale,
-                  height: 1024 * _scale,
-                  child: Image.asset(
-                    // width: 439 * 1,
-                    // height: 1024 * 1,
-                    widget.imagePath,
-                    fit: BoxFit.cover,
-                  ),
+              child: SizedBox(
+                width: 439 * _scale,
+                height: 1024 * _scale,
+                child: Image.asset(
+                  // width: 439 * 1,
+                  // height: 1024 * 1,
+                  widget.imagePath,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
