@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class ScrollableImage extends StatefulWidget {
@@ -47,27 +46,22 @@ class _ScrollableImageState extends State<ScrollableImage> {
     final screenHeight = MediaQuery.of(context).size.height;
     return Column(
       children: [
-        Listener(
-          onPointerSignal: (PointerSignalEvent event) {
-            if (event is PointerScrollEvent) {
-              debugPrint('mouse scrolled ${event.scrollDelta}');
-            }
+        GestureDetector(
+          onScaleStart: (ScaleStartDetails details) {
+            debugPrint('scale started');
           },
-          onPointerPanZoomStart: (PointerPanZoomStartEvent event) {
-            debugPrint('trackpad scroll started');
+          onScaleUpdate: (ScaleUpdateDetails details) {
+            debugPrint('scale updated: ${details.localFocalPoint}');
           },
-          onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) {
-            debugPrint('trackpad scrolled ${event.panDelta}');
-          },
-          onPointerPanZoomEnd: (PointerPanZoomEndEvent event) {
-            debugPrint('trackpad scroll ended');
+          onScaleEnd: (ScaleEndDetails details) {
+            debugPrint('scale ended');
           },
           child: SizedBox(
             width: screenWidth,
             height: screenWidth,
             child: SingleChildScrollView(
               controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               child: Image.asset(
                 widget.imagePath,
                 fit: BoxFit.fill,

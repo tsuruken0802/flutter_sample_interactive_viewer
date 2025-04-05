@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sample_transformation/image_size_calculation_util.dart';
-import 'package:flutter_sample_transformation/scrollable.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -22,15 +21,13 @@ class MyApp extends StatelessWidget {
           appBar: CupertinoNavigationBar.large(
             largeTitle: Text('サンプル'),
           ),
-          body: ScrollableImage(imagePath: 'assets/images/tate1.jpg')),
+          body: TransformationPage()),
     );
   }
 }
 
 class TransformationPage extends StatefulWidget {
-  const TransformationPage({super.key, required this.size});
-
-  final Size size;
+  const TransformationPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
