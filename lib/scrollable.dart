@@ -22,6 +22,8 @@ class _ScrollableImageState extends State<ScrollableImage> {
   final ScrollController _scrollController = ScrollController();
   bool _isZoomedIn = false;
 
+  double _scale = 1.0;
+
   void _onTapped() {
     setState(() {
       _isZoomedIn = !_isZoomedIn;
@@ -51,10 +53,16 @@ class _ScrollableImageState extends State<ScrollableImage> {
             debugPrint('scale started');
           },
           onScaleUpdate: (ScaleUpdateDetails details) {
-            debugPrint('scale updated: ${details.localFocalPoint}');
+            debugPrint('scale updated: ${details.scale}');
+            setState(() {
+              _scale = details.scale;
+            });
           },
           onScaleEnd: (ScaleEndDetails details) {
-            debugPrint('scale ended');
+            debugPrint('scale ended: ${details.scaleVelocity}');
+            setState(() {
+              // _scale = details.scale;
+            });
           },
           child: SizedBox(
             width: screenWidth,
@@ -62,9 +70,18 @@ class _ScrollableImageState extends State<ScrollableImage> {
             child: SingleChildScrollView(
               controller: _scrollController,
               physics: const BouncingScrollPhysics(),
-              child: Image.asset(
-                widget.imagePath,
-                fit: BoxFit.fill,
+              child: Transform.scale(
+                scale: 1.0,
+                child: SizedBox(
+                  width: 439 * _scale,
+                  height: 1024 * _scale,
+                  child: Image.asset(
+                    // width: 439 * 1,
+                    // height: 1024 * 1,
+                    widget.imagePath,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
           ),
