@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sample_transformation/custom_interactive_viewer.dart';
 
 class ScrollableImage extends StatefulWidget {
   final String imagePath;
@@ -22,7 +23,7 @@ class _ScrollableImageState extends State<ScrollableImage> {
   final ScrollController _scrollController = ScrollController();
   bool _isZoomedIn = false;
 
-  double _scale = 1.25;
+  final double _scale = 1.25;
 
   void _onTapped() {
     setState(() {
@@ -48,39 +49,11 @@ class _ScrollableImageState extends State<ScrollableImage> {
     final screenHeight = MediaQuery.of(context).size.height;
     return Column(
       children: [
-        GestureDetector(
-          onScaleStart: (ScaleStartDetails details) {
-            debugPrint('scale started');
-          },
-          onScaleUpdate: (ScaleUpdateDetails details) {
-            debugPrint('scale updated: ${details.scale}');
-            setState(() {
-              _scale = details.scale;
-            });
-          },
-          onScaleEnd: (ScaleEndDetails details) {
-            debugPrint('scale ended: ${details.scaleVelocity}');
-            setState(() {
-              // _scale = details.scale;
-            });
-          },
-          child: SizedBox(
-            width: screenWidth,
-            height: screenWidth,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              physics: const BouncingScrollPhysics(),
-              child: SizedBox(
-                width: 439 * _scale,
-                height: 1024 * _scale,
-                child: Image.asset(
-                  // width: 439 * 1,
-                  // height: 1024 * 1,
-                  widget.imagePath,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+        SizedBox(
+          width: screenWidth,
+          height: screenWidth,
+          child: CustomInteractiveViewer(
+            child: Image.asset(widget.imagePath),
           ),
         ),
         Padding(
