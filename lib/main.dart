@@ -45,10 +45,8 @@ class _TransformationPageState extends State<TransformationPage> {
   final threshold = 200.0;
 
   bool _isZoomedIn = false;
+  double scale = 1.0;
   ImageSizeResponse? _imageSize;
-
-  bool isEnabledScroll = false;
-  bool isScrolling = false;
 
   Future<File> get _imageFile async {
     // Get temporary directory
@@ -63,56 +61,12 @@ class _TransformationPageState extends State<TransformationPage> {
     super.initState();
     _initImageSize();
 
-    _scrollController.addListener(() {
-      // if (isScrolling) {
-      //   return;
-      // }
-      // final isCurrentEnabled = isEnabledScroll;
-      // final yValue = _scrollController.position.pixels;
-      // final minYValue = _scrollController.position.minScrollExtent;
-      // final maxYValue = _scrollController.position.maxScrollExtent;
-      // if (!isCurrentEnabled && yValue <= minYValue + threshold) {
-      //   // 一番上に到達した時の処理
-      //   print('Reached top');
-      //   setState(() {
-      //     isEnabledScroll = true;
-      //   });
-      // } else if (!isCurrentEnabled && yValue >= maxYValue - threshold) {
-      //   // 一番下に到達した時の処理
-      //   print('Reached bottom');
-      //   setState(() {
-      //     isEnabledScroll = true;
-      //   });
-      // } else if (isCurrentEnabled) {
-      //   setState(() {
-      //     isEnabledScroll = false;
-      //   });
-      // }
-    });
-
     _transformationController.addListener(() {
-      if (isScrolling) {
-        return;
-      }
-      final translation = _transformationController.value.getTranslation();
-      final containerWidth = MediaQuery.of(context).size.width;
-      final containerHeight = containerWidth;
-      final response = _calculateImageSize(containerWidth, containerHeight);
-      double imageHeight = response!.imageHeight;
-      final yValue = translation.y.abs();
-      if (yValue <= threshold) {
-        print("一番上: translation: ${translation.y}");
-        setState(() {
-          isEnabledScroll = true;
-        });
-      } else if (yValue >= imageHeight - threshold) {
-        print("一番下: translation: ${translation.y}");
-        setState(() {
-          isEnabledScroll = true;
-        });
-      } else {
-        print("真ん中真ん中");
-      }
+      final currentScale = _transformationController.value.getMaxScaleOnAxis();
+      // print("scale: $currentScale");
+      setState(() {
+        scale = currentScale;
+      });
     });
   }
 
@@ -244,63 +198,36 @@ class _TransformationPageState extends State<TransformationPage> {
     double imageHeight = response.imageHeight;
     double horizontalPadding = _isZoomedIn ? 0.0 : response.horizontalPadding;
     double verticalPadding = _isZoomedIn ? 0.0 : response.verticalPadding;
-    // print(_pointersCount);
+    final vPadding = imageHeight - imageHeight / scale;
+    final hPadding = imageWidth - imageWidth / scale;
+
     return Column(
       children: [
         SizedBox(
           width: containerWidth,
           height: containerHeight,
-          child: NotificationListener(
-            onNotification: (notification) {
-              if (notification is ScrollStartNotification) {
-                // print("スクロールが始まった: ${notification.metrics.pixels}");
-              }
-              if (notification is UserScrollNotification) {
-                // print("ユーザーがスクロールしている: ${notification.direction}");
-              }
-              if (notification is ScrollEndNotification) {
-                // print("スクロールが終わった: ${notification.metrics.pixels}");
-              }
-              // 子ウィジェットのonNotificationでtrueが返された場合は、ここではイベントが取得できない
-              // 子ウィジェットのonNotificationでfalseが返された場合は、ここでもイベントが取得できる
-              return (true);
-            },
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              physics: isEnabledScroll
-                  ? AlwaysScrollableScrollPhysics()
-                  : AlwaysScrollableScrollPhysics(),
-              child: SizedBox(
-                width: containerWidth,
-                height: containerHeight * 2,
-                child: InteractiveViewer(
-                  boundaryMargin: EdgeInsets.symmetric(
-                    vertical: verticalPadding,
-                    horizontal: horizontalPadding,
-                  ),
-                  panAxis: PanAxis.free,
-                  transformationController: _transformationController,
-                  minScale: 1.0,
-                  maxScale: 5,
-                  onInteractionStart: (details) {
-                    // print(details);
-                    // print(details);
-                    // print(details);
-                  },
-                  onInteractionEnd: (details) {
-                    // print(details);
-                  },
-                  constrained: false,
-                  child: SizedBox(
-                    width: imageWidth,
-                    height: imageHeight,
-                    child: Image.asset(
-                      'assets/images/$imageName',
-                      width: imageWidth,
-                      height: imageHeight,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              width: containerWidth + hPadding,
+              height: imageHeight + vPadding,
+              child: InteractiveViewer(
+                boundaryMargin: EdgeInsets.symmetric(
+                  vertical: verticalPadding,
+                  horizontal: horizontalPadding,
+                ),
+                panAxis: PanAxis.free,
+                transformationController: _transformationController,
+                minScale: 1.0,
+                maxScale: 5,
+                onInteractionStart: (details) {},
+                onInteractionEnd: (details) {},
+                constrained: false,
+                child: Image.asset(
+                  'assets/images/$imageName',
+                  width: imageWidth + hPadding,
+                  height: imageHeight + vPadding,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -344,28 +271,57 @@ class Response {
 }
 
 class CustomScrollPhysics extends ScrollPhysics {
+  // final double imageWidth;
+  final double imageHeight;
+
   /// Creates scroll physics that always lets the user scroll.
-  const CustomScrollPhysics({super.parent});
+  const CustomScrollPhysics({super.parent, required this.imageHeight});
 
   @override
   CustomScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    print("scroll applyTo: $ancestor");
-    return CustomScrollPhysics(parent: buildParent(ancestor));
+    // print("scroll applyTo: $ancestor");
+    return CustomScrollPhysics(
+        parent: buildParent(ancestor), imageHeight: imageHeight);
   }
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) {
-    print("scroll position: ${position.pixels}");
-    if (position.pixels <= 0) {
-      return false;
-    }
-    return false;
+    // print("shouldAcceptUserOffset: ${position.pixels}");
+    return true;
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    // print("applyPhysicsToUserOffset: $offset");
+    return super.applyPhysicsToUserOffset(position, offset);
   }
 
   @override
   bool get allowUserScrolling {
-    print("ユーザーがスクロールできるかどうかを返す");
+    // print("ユーザーがスクロールできるかどうかを返す");
     // ユーザーがスクロールできるかどうかを返す
     return false;
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    print("applyBoundaryConditions: ${position.pixels}");
+    if (position.pixels > imageHeight) {
+      return 0.0;
+    }
+    return super.applyBoundaryConditions(position, value);
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+      ScrollMetrics position, double velocity) {
+    // print("createBallisticSimulation: $velocity");
+    return super.createBallisticSimulation(position, velocity);
+  }
+
+  @override
+  double carriedMomentum(double existingVelocity) {
+    // print("carriedMomentum: $existingVelocity");
+    return super.carriedMomentum(existingVelocity);
   }
 }
